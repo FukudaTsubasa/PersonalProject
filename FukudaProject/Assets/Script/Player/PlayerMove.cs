@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerMove : MonoBehaviour
 {
     //入力方向
-    [SerializeField,Header("DEBUG")] float m_InputX,m_InputY;
+    [SerializeField, Header("DEBUG")] float m_InputX, m_InputY;
     [SerializeField, Header("移動速度")] float m_Speed;
 
     //プレイヤーの向きを取得する
@@ -53,11 +53,20 @@ public class PlayerMove : MonoBehaviour
     /// </summary>
     private void Move()
     {
-        Vector3 rotate = transform.position - m_PlayerRotationNow;
-        m_Rigidbody.velocity = new Vector3(m_InputX, 0, m_InputY);
-        if (rotate.magnitude > 0.01f)
-            m_Rigidbody.rotation = Quaternion.LookRotation(rotate);
-        m_PlayerRotationNow = transform.position;
+        //カメラの方向から、X-Z平面の単位ベクトルを取得
+        Vector3 cameraForward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1));
+
+        //方向キー入力値とカメラの向きから、移動方向を決定
+        Vector3 moveForward = cameraForward * m_InputY + Camera.main.transform.right * m_InputX;
+
+        //移動方向にスピードをかける。ジャンプや落下がある場合は、別途Y軸方向の速度ベクトルを足す
+        m_Rigidbody.velocity = moveForward * (m_Speed * Time.deltaTime) + new Vector3(0, m_Rigidbody.velocity.y, 0);
+
+        //キャラクターの向きを進行方向に
+        if (moveForward != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(moveForward);
+        }
     }
 
     /// <summary>
