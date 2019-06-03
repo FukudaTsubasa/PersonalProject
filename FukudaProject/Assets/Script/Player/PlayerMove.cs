@@ -7,25 +7,29 @@ public class PlayerMove : MonoBehaviour
     //入力方向
     [SerializeField, Header("DEBUG")] float m_InputX, m_InputY;
     [SerializeField, Header("移動速度")] float m_Speed;
+    [SerializeField, Header("ジャンプ力")] float m_JumpPower;
+
+    [Header("ジャンプアニメーション")] bool m_JumpAnim;
 
     //プレイヤーの向きを取得する
     private Vector3 m_PlayerRotationNow;
 
+    [SerializeField] CollisionChack m_CollisionChack;
+
+    /// <summary>
+    /// ジャンプアニメーション
+    /// </summary>
+    public bool JumpAnim{ get { return m_JumpAnim; } }
+
     /// <summary>
     /// X方向が入力されているか
     /// </summary>
-    public float InputX
-    {
-        get { return m_InputX; }
-    }
+    public float InputX{ get { return m_InputX; }}
 
     /// <summary>
     /// Y方向が入力されているか
     /// </summary>
-    public float InputY
-    {
-        get { return m_InputY; }
-    }
+    public float InputY{ get { return m_InputY; }}
 
     Rigidbody m_Rigidbody;
 
@@ -50,9 +54,13 @@ public class PlayerMove : MonoBehaviour
     /// <summary>
     /// プレイヤーの移動
     /// プレイヤーの向きを移動に沿って変える
+    /// ジャンプ処理  
     /// </summary>
     private void Move()
     {
+        //ジャンプ
+        Jump();
+
         //カメラの方向から、X-Z平面の単位ベクトルを取得
         Vector3 cameraForward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1));
 
@@ -60,13 +68,27 @@ public class PlayerMove : MonoBehaviour
         Vector3 moveForward = cameraForward * m_InputY + Camera.main.transform.right * m_InputX;
 
         //移動方向にスピードをかける。ジャンプや落下がある場合は、別途Y軸方向の速度ベクトルを足す
-        m_Rigidbody.velocity = moveForward * (m_Speed * Time.deltaTime) + new Vector3(0, m_Rigidbody.velocity.y, 0);
+        m_Rigidbody.velocity = moveForward * m_Speed + new Vector3(0, m_Rigidbody.velocity.y, 0);
 
         //キャラクターの向きを進行方向に
         if (moveForward != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(moveForward);
         }
+    }
+
+    /// <summary>
+    /// ジャンプ
+    /// </summary>
+    private void Jump()
+    {
+        if (Input.GetKeyDown(KeyCode.Space) && m_CollisionChack.IsHit_Jump)
+        {
+            m_JumpAnim = true;
+            m_Rigidbody.AddForce(Vector3.up * m_JumpPower);
+        }
+        else
+            m_JumpAnim = false;
     }
 
     /// <summary>
