@@ -17,6 +17,7 @@ public class PlayerAnimation : MonoBehaviour
     void Update()
     {
         RunAnimator();
+        JumpAnimator();
     }
 
     /// <summary>
@@ -28,5 +29,16 @@ public class PlayerAnimation : MonoBehaviour
             m_Animator.SetBool("Run", true);
         else if(m_PlayerMove.InputX == 0 && m_PlayerMove.InputY == 0)
             m_Animator.SetBool("Run", false);
+    }
+
+    /// <summary>
+    /// スペースキーを押したらジャンプアニマ―ションを再生
+    /// </summary>
+    void JumpAnimator()
+    {
+        if(m_PlayerMove.JumpAnim)
+            m_Animator.SetBool("Jump", true);
+        else
+            m_Animator.SetBool("Jump", false);
     }
 }
