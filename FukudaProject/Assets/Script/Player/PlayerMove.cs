@@ -2,34 +2,52 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+enum MoveState
+{
+    IDLE,
+    MOVE,
+    ROLL,
+}
+
 public class PlayerMove : MonoBehaviour
 {
     //入力方向
     [SerializeField, Header("DEBUG")] float m_InputX, m_InputY;
-    [SerializeField, Header("移動速度")] float m_Speed;
-    [SerializeField, Header("ジャンプ力")] float m_JumpPower;
+    [SerializeField, Header("移動速度(normal)")] float m_NormalSpeed;
+    [SerializeField, Header("前転する力")] float m_RollPower;
+    [SerializeField, Header("debug")] float debug;
 
-    [Header("ジャンプアニメーション")] bool m_JumpAnim;
+    private float m_LerpSpeed = 10.0f;
+    private float gravitySpeed = 0f;
+
+    private bool m_RollChack = false;
+    [Header("スライディングアニメーション")] bool m_SlideAnim;
+
+    MoveState m_MoveState;
 
     //プレイヤーの向きを取得する
     private Vector3 m_PlayerRotationNow;
+    //カメラの方向
+    private Vector3 m_CameraForward;
+    //プレイヤーの進む向き
+    private Vector3 m_MoveForward;
 
     [SerializeField] CollisionChack m_CollisionChack;
 
     /// <summary>
     /// ジャンプアニメーション
     /// </summary>
-    public bool JumpAnim{ get { return m_JumpAnim; } }
+    public bool SlideAnim { get { return m_SlideAnim; } }
 
     /// <summary>
     /// X方向が入力されているか
     /// </summary>
-    public float InputX{ get { return m_InputX; }}
+    public float InputX { get { return m_InputX; } }
 
     /// <summary>
     /// Y方向が入力されているか
     /// </summary>
-    public float InputY{ get { return m_InputY; }}
+    public float InputY { get { return m_InputY; } }
 
     Rigidbody m_Rigidbody;
 
@@ -38,6 +56,7 @@ public class PlayerMove : MonoBehaviour
     {
         m_PlayerRotationNow = GetComponent<Transform>().position;
         m_Rigidbody = GetComponent<Rigidbody>();
+        m_MoveState = MoveState.MOVE;
     }
 
     // Update is called once per frame
@@ -48,7 +67,25 @@ public class PlayerMove : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Move();
+        MoveStateContoroller();
+    }
+
+    /// <summary>
+    /// ステートを管理する
+    /// </summary>
+    void MoveStateContoroller()
+    {
+        switch (m_MoveState)
+        {
+            case MoveState.IDLE:
+                break;
+            case MoveState.MOVE:
+                Move(m_LerpSpeed);
+                break;
+            case MoveState.ROLL:
+                Roll();
+                break;
+        }
     }
 
     /// <summary>
@@ -56,39 +93,48 @@ public class PlayerMove : MonoBehaviour
     /// プレイヤーの向きを移動に沿って変える
     /// ジャンプ処理  
     /// </summary>
-    private void Move()
+    private void Move(float lerpspeed)
     {
-        //ジャンプ
-        Jump();
-
-        //カメラの方向から、X-Z平面の単位ベクトルを取得
-        Vector3 cameraForward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1));
-
-        //方向キー入力値とカメラの向きから、移動方向を決定
-        Vector3 moveForward = cameraForward * m_InputY + Camera.main.transform.right * m_InputX;
-
+        PlayerForward();
         //移動方向にスピードをかける。ジャンプや落下がある場合は、別途Y軸方向の速度ベクトルを足す
-        m_Rigidbody.velocity = moveForward * m_Speed + new Vector3(0, m_Rigidbody.velocity.y, 0);
-
+        m_Rigidbody.velocity = (m_MoveForward * m_NormalSpeed + new Vector3(0, m_Rigidbody.velocity.y, 0)) * Time.deltaTime;
         //キャラクターの向きを進行方向に
-        if (moveForward != Vector3.zero)
+        if (m_MoveForward != Vector3.zero)
         {
-            transform.rotation = Quaternion.LookRotation(moveForward);
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(m_MoveForward), lerpspeed * Time.deltaTime);
+        }
+        //前転状態に移行
+        if (Input.GetKeyDown(KeyCode.Space) && m_RollChack == false)
+            m_MoveState = MoveState.ROLL;
+    }
+
+    /// <summary>
+    /// 前転
+    /// </summary>
+    private void Roll()
+    {
+        PlayerForward();
+        //if (Input.GetKeyDown(KeyCode.Space) && m_RollChack == false)
+        m_RollChack = true;
+        if (m_RollChack)
+        {
+            print("はいｔｔるよ");
+            m_SlideAnim = true;
+            m_Rigidbody.AddForce(m_MoveForward * m_RollPower,ForceMode.Impulse);
+            StartCoroutine(WaitChack());
         }
     }
 
     /// <summary>
-    /// ジャンプ
+    /// プレイヤーが向いている方向に進むように
     /// </summary>
-    private void Jump()
+    void PlayerForward()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && m_CollisionChack.IsHit_Jump)
-        {
-            m_JumpAnim = true;
-            m_Rigidbody.AddForce(Vector3.up * m_JumpPower);
-        }
-        else
-            m_JumpAnim = false;
+        //カメラの方向から、X-Z平面の単位ベクトルを取得
+        m_CameraForward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1));
+
+        //方向キー入力値とカメラの向きから、移動方向を決定
+        m_MoveForward = m_CameraForward * m_InputY + Camera.main.transform.right * m_InputX;
     }
 
     /// <summary>
@@ -96,7 +142,20 @@ public class PlayerMove : MonoBehaviour
     /// </summary>
     void InputKey()
     {
-        m_InputX = Input.GetAxis("Horizontal") * m_Speed * Time.deltaTime;
-        m_InputY = Input.GetAxis("Vertical") * m_Speed * Time.deltaTime;
+        m_InputX = Input.GetAxis("Horizontal");
+        m_InputY = Input.GetAxis("Vertical");
+    }
+
+    /// <summary>
+    /// ROLL状態からMOVE状態に移行するときに少し時間を空ける
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator WaitChack()
+    {
+        yield return new WaitForSeconds(0.5f);
+        print("愛してる");
+        m_RollChack = false;
+        m_SlideAnim = false;
+        m_MoveState = MoveState.MOVE;
     }
 }
