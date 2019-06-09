@@ -114,7 +114,6 @@ public class PlayerMove : MonoBehaviour
     private void Roll()
     {
         PlayerForward();
-        //if (Input.GetKeyDown(KeyCode.Space) && m_RollChack == false)
         m_RollChack = true;
         if (m_RollChack)
         {
@@ -132,7 +131,6 @@ public class PlayerMove : MonoBehaviour
     {
         //カメラの方向から、X-Z平面の単位ベクトルを取得
         m_CameraForward = Vector3.Scale(Camera.main.transform.forward, new Vector3(1, 0, 1));
-
         //方向キー入力値とカメラの向きから、移動方向を決定
         m_MoveForward = m_CameraForward * m_InputY + Camera.main.transform.right * m_InputX;
     }
