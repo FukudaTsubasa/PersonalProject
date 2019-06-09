@@ -6,6 +6,7 @@ public class PlayerAnimation : MonoBehaviour
 {
     Animator m_Animator;
     [SerializeField] PlayerMove m_PlayerMove;
+    [SerializeField] PlayerAttack m_PlayerAttack;
 
     // Start is called before the first frame update
     void Start()
@@ -40,5 +41,13 @@ public class PlayerAnimation : MonoBehaviour
             m_Animator.SetBool("Slide", true);
         else
             m_Animator.SetBool("Slide", false);
+    }
+
+    /// <summary>
+    /// 左クリックしたら攻撃アニメーションを開始する
+    /// </summary>
+    void AttackAnimation()
+    {
+        
     }
 }
