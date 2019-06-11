@@ -19,6 +19,7 @@ public class PlayerAnimation : MonoBehaviour
     {
         RunAnimator();
         JumpAnimator();
+        AttackAnimation();
     }
 
     /// <summary>
@@ -48,6 +49,9 @@ public class PlayerAnimation : MonoBehaviour
     /// </summary>
     void AttackAnimation()
     {
-        
+        if (m_PlayerAttack.AttackChack)
+            m_Animator.SetBool("Attack", true);
+        else
+            m_Animator.SetBool("Attack",false);
     }
 }

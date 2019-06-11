@@ -524,7 +524,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_PlayerMove: {fileID: 1883481919}
-  m_PlayerAttack: {fileID: 0}
+  m_PlayerAttack: {fileID: 1883481925}
 --- !u!114 &1883481919
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -542,7 +542,9 @@ MonoBehaviour:
   m_NormalSpeed: 200
   m_RollPower: 0.5
   debug: 0
+  m_MoveState: 0
   m_CollisionChack: {fileID: 1883481924}
+  m_PlayerAttack: {fileID: 1883481925}
 --- !u!136 &1883481920
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -586,6 +588,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_IsHit_Jump: 0
+--- !u!114 &1883481925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1883481917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab4b8c51dadc893488ed30a18501cef2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PlayerMove: {fileID: 1883481919}
 --- !u!1001 &2106556474
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3858,7 +3873,9 @@ MonoBehaviour:
   m_NormalSpeed: 0
   m_RollPower: 0
   debug: 0
+  m_MoveState: 0
   m_CollisionChack: {fileID: 0}
+  m_PlayerAttack: {fileID: 0}
 --- !u!1 &1927866145784294
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-enum MoveState
+public enum MoveState
 {
     IDLE,
     MOVE,
     ROLL,
+    ATTACK,
 }
 
 public class PlayerMove : MonoBehaviour
@@ -23,7 +24,7 @@ public class PlayerMove : MonoBehaviour
     private bool m_RollChack = false;
     [Header("スライディングアニメーション")] bool m_SlideAnim;
 
-    MoveState m_MoveState;
+    public MoveState m_MoveState;
 
     //プレイヤーの向きを取得する
     private Vector3 m_PlayerRotationNow;
@@ -33,6 +34,7 @@ public class PlayerMove : MonoBehaviour
     private Vector3 m_MoveForward;
 
     [SerializeField] CollisionChack m_CollisionChack;
+    [SerializeField] PlayerAttack m_PlayerAttack;
 
     /// <summary>
     /// ジャンプアニメーション
@@ -85,6 +87,9 @@ public class PlayerMove : MonoBehaviour
             case MoveState.ROLL:
                 Roll();
                 break;
+            case MoveState.ATTACK:
+                m_PlayerAttack.Attack();
+                break;
         }
     }
 
@@ -103,9 +108,16 @@ public class PlayerMove : MonoBehaviour
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(m_MoveForward), lerpspeed * Time.deltaTime);
         }
+
         //前転状態に移行
         if (Input.GetKeyDown(KeyCode.Space) && m_RollChack == false)
             m_MoveState = MoveState.ROLL;
+        //攻撃状態に移行
+        if (Input.GetMouseButtonDown(0) && m_PlayerAttack.AttackStateChack == false)
+        {
+            m_PlayerAttack.AttackStateChack = true;
+            m_MoveState = MoveState.ATTACK;
+        }
     }
 
     /// <summary>
