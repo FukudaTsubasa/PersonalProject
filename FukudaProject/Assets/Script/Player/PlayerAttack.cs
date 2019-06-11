@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
+    [Header("プレイヤーが攻撃を始めたらAttack状態に移行する")] private bool m_AttackChack;
+
+    /// <summary>
+    /// Trueになったら攻撃アニメーションを開始する
+    /// </summary>
+    public bool AttackChack { get { return m_AttackChack; } }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -18,6 +25,7 @@ public class PlayerAttack : MonoBehaviour
 
     void Attack()
     {
-        
+        if (Input.GetMouseButtonDown(0) && m_AttackChack == false)
+            m_AttackChack = true;
     }
 }
